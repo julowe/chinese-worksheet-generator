@@ -61,6 +61,15 @@ class GenerateSheet(Resource):
             stroke_order_color == None or len(stroke_order_color) == 0 or \
             title == None:
             return jsonpify({'error': 'Invalid parameters'});
+
+        character_guide_opacity, err = parse_opacity_param(request.args.get('character_guide_opacity'));
+        if err:
+            return jsonpify({'error': 'Invalid character guide opacity'});
+
+        stroke_order_opacity, err = parse_opacity_param(request.args.get('stroke_order_opacity'));
+        if err:
+            return jsonpify({'error': 'Invalid stroke order opacity'});
+
         try:
             guide = generator.get_guide(guide);
         except GenException as e:
@@ -71,7 +80,7 @@ class GenerateSheet(Resource):
 
         error_msg = 'generate_sheet ' + title + ' ' + str(guide) + '\n';
         try:
-            generator.generate_sheet(MAKEMEAHANZI_PATH, temp_path, title, guide, stroke_order_color);
+            generator.generate_sheet(MAKEMEAHANZI_PATH, temp_path, title, guide, stroke_order_color, character_guide_opacity=character_guide_opacity, stroke_order_opacity=stroke_order_opacity);
         except GenException as e:
             log_error(temp_path, error_msg + str(e));
             return jsonpify({'error': str(e)});
@@ -225,6 +234,17 @@ def log_error(working_directory, message):
             f.write(os.linesep + os.linesep);
     finally:
         error_lock.release();
+
+def parse_opacity_param(val):
+    if val is not None and len(val) > 0:
+        try:
+            opacity = int(val);
+            if 0 <= opacity <= 100:
+                return opacity, None;
+            return None, 'Opacity must be between 0 and 100';
+        except ValueError:
+            return None, 'Invalid opacity value';
+    return None, None;
 
 def usage():
     print('usage: ' + PROGRAM_NAME + '\n');

@@ -37,12 +37,20 @@ This will generate word definitions!
 </div>
 <div class="form-group">
   <label for="guide">Guide:</label>
-  <select id="guide" class="form-control input-lg">
+  <select id="guide" class="form-control input-lg" onchange="onGuideChange()">
     <option value="0">None</option>
     <option value="1">X Star</option>
     <option value="2" selected>+ Cross</option>
     <option value="3">米 Cross &amp; Star</option>
     <option value="4">字 Character</option>
+  </select>
+</div>
+<div class="form-group" id="character-guide-opacity-group" style="display:none">
+  <label for="character-guide-opacity">Character Guide Opacity / Lightness:</label>
+  <select id="character-guide-opacity" class="form-control input-lg">
+    <option value="100" selected>Default Gray (100%)</option>
+    <option value="50">Light (50%)</option>
+    <option value="25">Very Light (25%)</option>
   </select>
 </div>
 <div class="form-group">
@@ -52,6 +60,14 @@ This will generate word definitions!
     <option value="1">Red</option>
     <option value="2">Blue</option>
     <option value="3">Green</option>
+  </select>
+</div>
+<div class="form-group">
+  <label for="stroke-order-opacity">Stroke Order Upcoming Strokes Opacity:</label>
+  <select id="stroke-order-opacity" class="form-control input-lg">
+    <option value="100" selected>Default Gray (100%)</option>
+    <option value="50">Light (50%)</option>
+    <option value="25">Very Light (25%)</option>
   </select>
 </div>
 <button id="submit" type="submit" class="btn-lg btn-primary"

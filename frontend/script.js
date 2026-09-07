@@ -21,6 +21,20 @@ function onLoad()
     }
   }
   req.send(null);
+  onGuideChange();
+}
+
+function onGuideChange()
+{
+  var guide = document.getElementById("guide").value;
+  var opacityGroup = document.getElementById("character-guide-opacity-group");
+  if (opacityGroup) {
+    if (guide == 4) {
+      opacityGroup.style.display = "block";
+    } else {
+      opacityGroup.style.display = "none";
+    }
+  }
 }
 
 function generateInfos()
@@ -154,6 +168,11 @@ function generateSheet()
             "&title=" + title +
             "&stroke_order_color=" + strokeOrderColor;
 
+  if (guide == "character") {
+    url += getOpacityParameter("character-guide-opacity", "character_guide_opacity");
+  }
+  url += getOpacityParameter("stroke-order-opacity", "stroke_order_opacity");
+
   url += get_character_parameters();
   url += get_words_parameters();
 
@@ -267,4 +286,18 @@ function showError(element, message)
 {
   document.getElementById(element).style.display = "inline";
   document.getElementById(element).innerHTML = "<strong>Error: </strong>" + message;
+}
+
+function getOpacityParameter(elementId, paramName)
+{
+  var el = document.getElementById(elementId);
+  if (el && el.value !== "")
+  {
+    var op = parseInt(el.value, 10);
+    if (!isNaN(op) && op >= 0 && op <= 100)
+    {
+      return "&" + paramName + "=" + op;
+    }
+  }
+  return "";
 }

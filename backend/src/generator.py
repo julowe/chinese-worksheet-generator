@@ -157,22 +157,33 @@ class Generator:
         self._create_stroke_svg(working_dir, radical, stroke_order, \
                             len(stroke_order));
 
-    def _create_stroke_svg(self, working_dir, filename, stroke_order, stroke_number, stroke_color="black"):
+    def _create_stroke_svg(self, working_dir, filename, stroke_order, stroke_number, stroke_color="black", opacity=None):
         output = '<svg viewBox="0 0 128 128">' \
                 '<g transform="scale(0.125, -0.125) translate(0, -900)">'
+        opacity_attr = ""
+        if opacity is not None:
+            val = float(opacity)
+            if isinstance(opacity, int) and opacity > 0:
+                val = opacity / 100.0
+            elif val > 1.0:
+                val = val / 100.0
+            val = max(0.0, min(1.0, val))
+            if val < 1.0:
+                opacity_attr = ' fill-opacity="' + f'{val:g}' + '"'
         for j in range(stroke_number, len(stroke_order)):
-            output += '\n<path fill=\"gray\" d=\"' + stroke_order[j] + '\"></path>';
+            output += '\n<path fill=\"gray\"' + opacity_attr + ' d=\"' + stroke_order[j] + '\"></path>';
         for j in range(0, stroke_number):
             output += '\n<path fill=\"' + stroke_color + '\" d=\"' + stroke_order[j] + '\"></path>';
         output += '</g>\n</svg>';
         with open(os.path.join(working_dir, filename + '.svg'), 'w') as svg:
             svg.write(output);
 
-    def _create_stroke_order_svgs(self, working_dir, character_info, stroke_order_color):
+    def _create_stroke_order_svgs(self, working_dir, character_info, stroke_order_color, stroke_order_opacity=None, character_guide_opacity=None):
         character = character_info.character;
         stroke_order = character_info.stroke_order;
         for i in range(0, len(stroke_order)+1):
-            self._create_stroke_svg(working_dir, character + str(i), stroke_order, i, stroke_order_color);
+            op = character_guide_opacity if i == 0 else stroke_order_opacity;
+            self._create_stroke_svg(working_dir, character + str(i), stroke_order, i, stroke_order_color, opacity=op);
 
     def _convert_svg_to_png(self, svg_path, png_path):
         quality = 100;
@@ -518,7 +529,7 @@ class Generator:
             spanning_translations[word] = tr;
         return spanning_translations;
 
-    def generate_sheet(self, makemeahanzi_path, working_dir, title, guide, stroke_order_color):
+    def generate_sheet(self, makemeahanzi_path, working_dir, title, guide, stroke_order_color, character_guide_opacity=None, stroke_order_opacity=None):
         if len(title) > MAX_TITLE_LENGTH:
             raise GenException('Title length exceeded (' + str(len(title)) + \
                     '/' + str(MAX_TITLE_LENGTH) + ')');
@@ -553,7 +564,7 @@ class Generator:
             info = character_infos[i];
             self._create_character_svg(working_dir, info);
             self._create_radical_svg(makemeahanzi_path, working_dir, info);
-            self._create_stroke_order_svgs(working_dir, info, stroke_order_color);
+            self._create_stroke_order_svgs(working_dir, info, stroke_order_color, stroke_order_opacity, character_guide_opacity);
             self._convert_svgs_to_pngs(working_dir);
             y = FIRST_CHARACTER_ROW_Y-i_mod*CHARACTER_ROW_HEIGHT;
             self._draw_character_row(working_dir, c, info, y, guide);
