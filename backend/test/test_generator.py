@@ -2,7 +2,7 @@ import os
 import unittest
 import tempfile
 
-from generator import Generator, WORDS_FILE, CHARACTERS_FILE
+from generator import Generator, WORDS_FILE, CHARACTERS_FILE, Guide
 from exceptions import GenException
 
 # TODO: test the Generator.__init__ separately
@@ -85,6 +85,74 @@ class TestGen(unittest.TestCase):
                 g = Generator(self.makemeahanzi_path)
                 g.generate_infos(self.makemeahanzi_path, self.cedict_path, \
                             wd, characters);
+
+    def test_create_stroke_svg_custom_opacity(self):
+        with tempfile.TemporaryDirectory() as wd:
+            g = Generator(self.makemeahanzi_path)
+            strokes = ['M0,0 L10,10', 'M10,10 L20,20']
+            g._create_stroke_svg(
+                wd,
+                'test_stroke',
+                strokes,
+                1,
+                stroke_color='black',
+                opacity=50,
+            )
+            with open(os.path.join(wd, 'test_stroke.svg'), 'r') as f:
+                content = f.read()
+            self.assertIn('fill-opacity="0.5"', content)
+
+    def test_create_stroke_svg_one_percent_opacity(self):
+        with tempfile.TemporaryDirectory() as wd:
+            g = Generator(self.makemeahanzi_path)
+            strokes = ['M0,0 L10,10', 'M10,10 L20,20']
+            g._create_stroke_svg(
+                wd,
+                'test_guide',
+                strokes,
+                0,
+                stroke_color='black',
+                opacity=1,
+            )
+            with open(os.path.join(wd, 'test_guide.svg'), 'r') as f:
+                content = f.read()
+            self.assertIn('fill-opacity="0.01"', content)
+
+    def test_create_stroke_svg_default_and_100_opacity(self):
+        with tempfile.TemporaryDirectory() as wd:
+            g = Generator(self.makemeahanzi_path)
+            strokes = ['M0,0 L10,10', 'M10,10 L20,20']
+            # Default None
+            g._create_stroke_svg(wd, 'test_default', strokes, 1, stroke_color='black', opacity=None)
+            with open(os.path.join(wd, 'test_default.svg'), 'r') as f:
+                content = f.read()
+            self.assertIn('fill="gray"', content)
+            self.assertNotIn('fill-opacity', content)
+
+            # 100%
+            g._create_stroke_svg(wd, 'test_100', strokes, 1, stroke_color='black', opacity=100)
+            with open(os.path.join(wd, 'test_100.svg'), 'r') as f:
+                content_100 = f.read()
+            self.assertIn('fill="gray"', content_100)
+            self.assertNotIn('fill-opacity', content_100)
+
+    def test_generate_sheet_custom_opacities(self):
+        with tempfile.TemporaryDirectory() as wd:
+            characters = '你'
+            g = Generator(self.makemeahanzi_path)
+            g.generate_infos(self.makemeahanzi_path, self.cedict_path, wd, characters)
+            g.generate_sheet(
+                self.makemeahanzi_path,
+                wd,
+                'Test Title',
+                Guide.CHARACTER,
+                'black',
+                character_guide_opacity=25,
+                stroke_order_opacity=50,
+            )
+            sheet_path = os.path.join(wd, 'sheet.pdf')
+            self.assertTrue(os.path.exists(sheet_path))
+            self.assertGreater(os.path.getsize(sheet_path), 0)
 
     def __assert_correct_info_files(self, working_directory, \
                                     expected_number_of_characters, \
