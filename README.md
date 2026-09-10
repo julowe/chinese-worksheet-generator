@@ -69,8 +69,23 @@ source .venv/bin/activate
 
 ### Generate worksheet
 
+To generate a worksheet from a list of characters in the command line, run the following command:
+
 ```sh
 python backend/src/cli.py --characters='你好' --title='Vocabulary' --guide='star' --stroke-order-color='red'
+```
+
+You can also configure the transparency of the stroke order by adding the `--stroke-order-opacity` argument,
+and the transparency of the character guide by adding the `--character-guide-opacity` argument,
+both of which take an integer value between 0 and 100.
+
+For example, to have a character stroke guide in the worksheet boxes,
+and to set the stroke order opacity to 75%
+and the character guide opacity to 25%,
+run the following command:
+
+```sh
+python backend/src/cli.py --characters='你好' --title='Vocabulary' --guide='character' --stroke-order-color='red' --character-guide-opacity=25 --stroke-order-opacity=75
 ```
 
 ### Customize pinyin, translation and words
